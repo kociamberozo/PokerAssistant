@@ -1,23 +1,37 @@
 #include <iostream>
 #include <cstdlib>
 using namespace std;
+void cleaner(){
+  for(int i = 0; i < 100; i++){
+    cout << "\n";
+  }
+}
+void displayBoard(int TabOfPlayers[], int hand, int numberOfPlayers, int whoStarts, int startingBid){
+  cout << "\n***********************************************************";
+  cout << "\n                       ROZDANIE: " << hand;
+  cout << "\n***********************************************************";
+  for(int i = 0; i < numberOfPlayers; i++){
+    cout << "\nGracz " << i + 1 << " posiada: " << TabOfPlayers[i];
+  }
+  cout << "\n***********************************************************";
+  cout << "\n                ROZDANIE FUNDUJE GRACZ: " << whoStarts;
+  cout << "\n                AKTUALNY KOSZT WEJŚCIA: " << startingBid;
+  cout << "\n***********************************************************\n\n";
+}
+void displayRound(int iteration, int handWin){
+  if(iteration == 0){ cout << "\nRunda 1 - kart na stole: 0 - suma żetonów na stole: " << handWin << "\n"; }
+  if(iteration == 1){ cout << "\nRunda 2 - kart na stole: 3 - suma żetonów na stole: " << handWin << "\n"; }
+  if(iteration == 2){ cout << "\nRunda 3 - kart na stole: 4 - suma żetonów na stole: " << handWin << "\n"; }
+  if(iteration == 3){ cout << "\nRunda 4 - kart na stole: 5 - suma żetonów na stole: " << handWin << "\n"; }
+}
 int main(){
   bool mainRun = true;
-  bool endGame;//endGame question for restart or quit
-  bool chooseRand;//security for whoStars answer
   bool chooseRandManualy;//security for whoStarts out of range (manual input)
   bool actualGame;//heart of the game
   bool roundPlay;//loop for current hand
-  bool startingBidControl;//simple security loop use
-  bool bidRiseControl;//simple security loop use
-  bool bidRoundControl;//simple security loop use
-  bool reduceChipsControl;//simply you cannot put on the table more than you own
-  bool handWinnerControl;
-  bool numberOfPlayersControl;
-  bool chipsPerPlayerControl;
+  bool inputControl;
   bool brokenPlayer;//if player has 0 chips than he can not host the game
-  char newGame;//endGame answer value (y/n)
-  char randAnswer;//whoStarts answer value (y/n) ~ (rand/manual)
+  char charAnswer;//used for (y/n) answers
   int numberOfPlayers;
   int chipsPerPlayer;
   int whoStarts; //id of player that starts the game
@@ -32,115 +46,129 @@ int main(){
   int handWin;//ammount of chips on the table
   int handWinner;//player that gets the handWin
   int lastHand;//for checking if next player made a rise
-  int riseMarker;//saveing id of player that made a rise
   int riseStop;//hold ammount of players and count down
+  int displayFounderID;
+  int displayFoundingCost;
+  int guardian2;
   while(mainRun){
-    hand = 1;
     bidHandCounter = 0;
-    endGame = true;
-    chooseRand = true;
-    chooseRandManualy = true;
-    actualGame = true;
-    startingBidControl = true;
-    numberOfPlayersControl = true;
-    chipsPerPlayerControl = true;
-    while(numberOfPlayersControl){
+    cleaner();
+    inputControl = true;
+    while(inputControl){
       cout << "\nPodaj liczbę graczy: ";
       cin >> numberOfPlayers;
       if(numberOfPlayers < 2){
-        cout << "\nLiczba graczy nie może być mniejsza od 2. ";
-        numberOfPlayersControl = true;
+        cleaner();
+        cout << "\nLiczba graczy nie może być mniejsza od 2.\n";
       }
-      else{ numberOfPlayersControl = false; }
+      else{ inputControl = false; }
     }
-    int TabOfPLayers[numberOfPlayers];//array of actual chips
-    while(chipsPerPlayerControl){
-      cout << "\nPodaj liczbę rzetonów przypadających na gracza: ";
+    guardian2 = numberOfPlayers;
+    int TabOfPlayers[numberOfPlayers];
+    int TabOfLoosers[numberOfPlayers];
+    for(int i = 0; i < numberOfPlayers; i++){
+      TabOfLoosers[i] = 0;
+    }
+    cleaner();
+    inputControl = true;
+    while(inputControl){
+      cout << "\nPodaj liczbę żetonów przypadających na gracza: ";
       cin >> chipsPerPlayer;
       if(chipsPerPlayer < 100){
-        cout << "\nLiczba rzetonów nie może być mniejsza od 100. ";
-        chipsPerPlayerControl = true;
+        cleaner();
+        cout << "\nLiczba żetonów nie może być mniejsza od 100.\n";
       }
-      else{ chipsPerPlayerControl = false; }
+      else{ inputControl = false; }
     }
     for(int i = 0; i < numberOfPlayers; i++){
-      TabOfPLayers[i] = chipsPerPlayer;
+      TabOfPlayers[i] = chipsPerPlayer;
     }
-    while(startingBidControl){
+    cleaner();
+    inputControl = true;
+    while(inputControl){
       cout << "\nPodaj stawkę, którą zapłaci rozgrywający gracz: ";
       cin >> startingBid;
       if((startingBid < 0) || (startingBid > chipsPerPlayer)){
-        startingBidControl = true;
-        cout << "\nStawka nie może być mniejsza od 0, ani większa od połowy rzetonów przypadających na gracza. ";
+        cleaner();
+        cout << "\nStawka nie może być mniejsza od 0, ani większa od połowy żetonów przypadających na gracza.\n";
       }
-      else{ startingBidControl = false; }
+      else{ inputControl = false; }
     }
-    while(bidRiseControl){
+    cleaner();
+    inputControl = true;
+    while(inputControl){
       cout << "\nPodaj o ile stawka będzie się zwiększać: ";
       cin >> bidRise;
       if((bidRise < 0) || (bidRise > chipsPerPlayer)){
-        bidRiseControl = true;
-        cout << "\nWartość nie może być mniejsza od 0, ani większa od połowy rzetonów przypadających na gracza. ";
+        cleaner();
+        cout << "\nWartość nie może być mniejsza od 0, ani większa od połowy żetonów przypadających na gracza.\n";
       }
-      else{ bidRiseControl = false; }
+      else{ inputControl = false; }
     }
+    cleaner();
+    inputControl = true;
     if(bidRise != 0){
-      while(bidRoundControl){
+      while(inputControl){
         cout << "\nPodaj co ile rund stawka będzie zwiększana: ";
         cin >> bidRound;
         if(bidRound <= 0){
-          bidRoundControl = true;
-          cout << "\nLiczba rund nie może być mniejsza lub równa 0. ";
+          cleaner();
+          cout << "\nLiczba rund nie może być mniejsza lub równa 0.\n";
         }
-        else{ bidRoundControl = false; }
+        else{ inputControl = false; }
       }
     }
-    while(chooseRand){
+    cleaner();
+    inputControl = true;
+    chooseRandManualy = true;
+    while(inputControl){
       cout << "\nCzy chcesz żeby komputer wylosował gracza, który zaczynie rozgrywkę? (y/n) ";
-      cin >> randAnswer;
-      if(randAnswer == 121){ chooseRand = false; whoStarts = rand() % numberOfPlayers + 1;  }
-      if(randAnswer == 110){
-        chooseRand = false;
+      cin >> charAnswer;
+      if(charAnswer == 121){
+        inputControl = false;
+        whoStarts = rand() % numberOfPlayers + 1;
+      }
+      if(charAnswer == 110){
+        inputControl = false;
+        cleaner();
         while(chooseRandManualy){
           cout << "\nKtóry gracz ma zaczynać? (dostępny zakres: <" << "1 - " << numberOfPlayers << ">) ";
           cin >> whoStarts;
           if((whoStarts >= 1) && (whoStarts <= numberOfPlayers)){ chooseRandManualy = false; }
-          else{ cout << "\nWybrany gracz musi zostać wybrany z podanego zakresu. "; }
+          else{
+            cleaner();
+            cout << "\nWybrany gracz musi zostać wybrany z podanego zakresu.\n";
+          }
         }
       }
     }
     //********************************** MAIN GAME ********************************************
+    hand = 1;
+    actualGame = true;
     while(actualGame = true){
       handWin = 0;
       brokenPlayer = true;
       while(brokenPlayer){
-        if(TabOfPLayers[whoStarts - 1] <= 0){ whoStarts++; }
+        if(TabOfPlayers[whoStarts - 1] <= 0){ whoStarts++; }
         else{ brokenPlayer = false; }
       }
-      cout << "\n***********************************************************";
-      cout << "\n                       ROZDANIE: " << hand;
-      cout << "\n***********************************************************";
-      for(int i = 0; i < numberOfPlayers; i++){
-        cout << "\nGracz " << i + 1 << " posiada: " << TabOfPLayers[i];
-      }
-      cout << "\n***********************************************************";
-      cout << "\n                ROZDANIE FUNDUJE GRACZ: " << whoStarts;
-      cout << "\n                AKTUALNY KOSZT WEJŚCIA: " << startingBid;
-      cout << "\n***********************************************************\n\n";
-      TabOfPLayers[whoStarts - 1] = TabOfPLayers[whoStarts - 1] - startingBid;
-      handWin = handWin + startingBid;
+
+      TabOfPlayers[whoStarts - 1] = TabOfPlayers[whoStarts - 1] - startingBid;
+      handWin += startingBid;
+      displayFoundingCost = startingBid;
+      displayFounderID = whoStarts;
       bidHandCounter++;
       if(bidHandCounter >= bidRound){
         bidHandCounter = 0;
-        startingBid = startingBid + bidRise;
+        startingBid += bidRise;
       }
+
       for(int i = 0; i < 4; i++){
         roundPlay = true;
-        if(i == 0){ cout << "\nRunda 1 - kart na stole: 0"; }
-        if(i == 1){ cout << "\nRunda 2 - kart na stole: 3"; }
-        if(i == 2){ cout << "\nRunda 3 - kart na stole: 4"; }
-        if(i == 3){ cout << "\nRunda 4 - kart na stole: 5"; }
-        cout << "\nRozpoczyna gracz: " << whoStarts;
+        cleaner();
+        displayBoard(TabOfPlayers,hand,numberOfPlayers,displayFounderID,displayFoundingCost);
+        displayRound(i,handWin);
+        cout << "\nRozpoczyna gracz: " << whoStarts << "\n";
         guardian = 0;
         lastHand = 0;
         reduceChips = 0;
@@ -148,62 +176,74 @@ int main(){
         while(roundPlay){
           riseStop--;
           guardian++;
-          reduceChipsControl = true;
-          while(reduceChipsControl){
-            cout << "\nCzy odejmujesz graczowi " << whoStarts << " rzetony? (jeżeli nie wpisz 0) ";
-            cin >> reduceChips;
-            if(reduceChips > TabOfPLayers[whoStarts - 1]){
-              cout << "\nPodana wartość przekracza liczbę rzetonów gracza: " << TabOfPLayers[whoStarts - 1];
-              reduceChipsControl = true;
+          inputControl = true;
+          while(inputControl){
+            if(TabOfLoosers[whoStarts - 1] != 1){
+              cout << "\nCzy odejmujesz graczowi " << whoStarts << " żetony? (jeżeli nie wpisz 0) ";
+              cin >> reduceChips;
+              if(reduceChips > TabOfPlayers[whoStarts - 1]){
+                cout << "\nPodana wartość przekracza liczbę żetonów gracza: " << TabOfPlayers[whoStarts - 1] << "\n";
+              }
+              else{
+                if(reduceChips < 0){ cout << "\nChciałbyś\n"; }
+                else{
+                  if((reduceChips < lastHand) && (reduceChips != 0)){
+                    cout << "\nPoprzedni gracz podbił stawkę. Sprawdź go/ podbij stawke/ spasuj(wpis 0)\n";
+                  }
+                  else{ inputControl = false; }
+                }
+              }
             }
             else{
-              if((reduceChips < lastHand) && (reduceChips != 0)){
-                cout << "\nPoprzedni gracz podbił stawkę. Sprawdź go/ podbij stawke/ spasuj(wpis 0) ";
-                reduceChipsControl = true;
-              }
-              else{ reduceChipsControl = false; }
-            }
+              whoStarts++;
+             }
+
           }
           if(reduceChips > lastHand){
-            cout << "\nStawka została podbita";
-            riseMarker = whoStarts;
+            cout << "\nStawka została podbita.\n";
             riseStop = numberOfPlayers - 1;
           }
           if(reduceChips != 0){ lastHand = reduceChips; }
-          handWin = handWin + reduceChips;
-          TabOfPLayers[whoStarts - 1] = TabOfPLayers[whoStarts - 1] - reduceChips;
+          handWin += reduceChips;
+          TabOfPlayers[whoStarts - 1] -= reduceChips;
           whoStarts++;
           if(whoStarts > numberOfPlayers){ whoStarts = 1; }
-          if((guardian >= numberOfPlayers) && (riseStop <= 0)){ roundPlay = false; }
+          if((guardian >= guardian2) && (riseStop <= 0)){ roundPlay = false; }
         }
       }
-      handWinnerControl = true;
-      while(handWinnerControl){
+      inputControl = true;
+      while(inputControl){
         cout << "\nKtóry gracz wygrywa rozdanie? ";
         cin >> handWinner;
         if((handWinner < 1) || (handWinner > numberOfPlayers)){
-          handWinnerControl = true;
-          cout << "Podano wartość spoza zakresu liczby graczy. ";
+          cout << "\nPodano wartość spoza zakresu liczby graczy.\n";
         }
         else{
-          TabOfPLayers[handWinner - 1] = TabOfPLayers[handWinner - 1] + handWin;
-          handWinnerControl = false;
+          TabOfPlayers[handWinner - 1] += handWin;
+          inputControl = false;
         }
       }
       whoStarts++;
       hand++;
       if(whoStarts > numberOfPlayers){ whoStarts = 1; }
       for(int i = 0; i < numberOfPlayers; i++){
-        if(TabOfPLayers[i] <= 0){ countLoose++; }
+        if(TabOfPlayers[i] == 0){
+          TabOfLoosers[i] = 1;
+          guardian2--;
+        }
+      }
+      for(int i = 0; i < numberOfPlayers; i++){
+        if(TabOfPlayers[i] <= 0){ countLoose++; }
         if(countLoose >= (numberOfPlayers - 1)){ actualGame = false; }
       }
     }
     //********************************** MAIN GAME ********************************************
-    while(endGame){
+    inputControl = true;
+    while(inputControl){
       cout << "\nGra zakończona. Rozpocząć nową? (y/n) ";
-      cin >> newGame;
-      if(newGame == 121){ endGame = false; mainRun = true;  }
-      if(newGame == 110){ mainRun = false; endGame = false; }
+      cin >> charAnswer;
+      if(charAnswer == 121){ inputControl = false; mainRun = true; }
+      if(charAnswer == 110){ inputControl = false; mainRun = false; }
     }
   }
 }
